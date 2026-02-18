@@ -1,1 +1,132 @@
+## Nombre del caso
+
+Notificación automática de cotización del Dólar Oficial utilizando DolarApi.
+
+---
+
+## Descripción general
+
+Este workflow consulta automáticamente la cotización actual del Dólar Oficial en Argentina mediante la API pública **DolarApi** y envía una notificación por correo electrónico con los valores obtenidos.
+
+El flujo contiene:
+
+- Trigger automático
+- Integración con DolarApi
+- Manejo y normalización de datos
+- Flujo condicional (IF)
+- Envío de notificación automática
+
+
+---
+
+## Trigger del workflow
+
+**Tipo:** Webhook 
+
+El workflow se dispara:
+
+- Mediante un Webhook cuando se ejecuta la URL correspondiente : http://localhost:5678/webhook-test/dolar
+
+---
+
+## Descripción de los nodos
+
+### 1️⃣ Trigger (Webhook)
+
+Inicia la ejecución del workflow de manera automática cuando se envia el Get.
+
+---
+
+### 2️⃣ HTTP Request – DolarApi
+
+- Método: `GET`
+- URL: `https://dolarapi.com/v1/dolares/oficial`
+- Autenticación: `None`
+- Response Format: `JSON`
+
+Este nodo realiza una llamada a la API pública para obtener la cotización actual del Dólar Oficial.
+Se estableció que este nodo intente obtener una respuesta de la API 3 veces cada 2000 segundos
+
+
+---
+
+### 3️⃣ Edit Fields / Set (Normalización)
+
+Se normalizan los datos recibidos de la API y se preparan para su uso posterior:
+
+- `tipo`: String
+- `compra`: Number
+- `venta`: Number
+- `fechaActualizacion`: String
+
+
+---
+
+### 4️⃣ IF (Flujo condicional)
+
+Se evalúa si el valor de `venta` supera un umbral definido de 1200
+
+**Condición utilizada:**
+venta > 1200
+
+
+- Si la condición es verdadera → Se envía correo con asunto de ALERTA.
+- Si la condición es falsa →Se envía correo con asunto de REPORTE.
+
+---
+
+### 5️⃣ Gmail – Send a message ALERTA
+
+Se envía un correo automático con:
+
+- Tipo de dólar
+- Precio de compra
+- Precio de venta
+- Fecha de actualización
+
+El asunto y el cuerpo del mensaje utilizan expresiones dinámicas para insertar los valores obtenidos de la API.
+
+
+---
+
+## Qué evalúa el condicional y por qué
+
+El nodo IF evalúa si la cotización de venta supera un valor de referencia (1200)
+
+Esto permite:
+
+- Generar alertas automáticas ante subas relevantes.
+- Demostrar el uso de condiciones y ramas dentro del workflow.
+- Implementar una lógica de negocio simple.
+
+---
+
+## Configuración de la notificación
+
+Se utilizó el nodo Gmail con:
+
+- Credenciales configuradas mediante el gestor seguro de n8n.
+- Cuerpo del mensaje en formato HTML con datos interpolados.
+
+
+---
+
+## Gmail – Send a message REPORTE
+
+Se envía un correo automático con:
+
+- Tipo de dólar
+- Precio de compra
+- Precio de venta
+- Fecha de actualización
+
+El objetivo de este mail es que aunque el dolar no varíe según la condición planteada igualmente me envié la notificación con la cotización del día pero con el asunto Reporte.
+
+
+
+---
+
+## Resultado
+
+Cada vez que el workflow se ejecuta, se envía automáticamente un correo electrónico con la cotización actual del Dólar Oficial, aplicando una condición para generar alertas según el valor de venta.
 
