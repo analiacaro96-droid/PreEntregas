@@ -1,0 +1,236 @@
+{
+  "name": "PreentregaCotizacionUSD",
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://dolarapi.com/v1/dolares/oficial",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "d4059c3e-e426-4d83-9e3e-ed4aafdbe942",
+      "name": "HTTP Request",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "path": "dolar",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "55e30d76-d7a9-4221-8f56-8dccde739e61",
+      "name": "Webhook",
+      "webhookId": "01baf079-ba1e-4e15-a327-1c405ea1261f",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7cee564d-20b2-45e7-befb-597507afee39",
+              "name": "tipo",
+              "value": "={{ $json.nombre }}",
+              "type": "string"
+            },
+            {
+              "id": "d43b137c-e731-4b7a-bdc9-a7d62f13eaf4",
+              "name": "compra",
+              "value": "={{ $json.compra }}",
+              "type": "number"
+            },
+            {
+              "id": "1730e25f-04d8-42ec-a7f6-a69a9212c331",
+              "name": "venta",
+              "value": "={{ $json.venta }}",
+              "type": "number"
+            },
+            {
+              "id": "d3e52a18-c3a0-4a67-aef2-e6ee2812e99f",
+              "name": "fecha",
+              "value": "={{ $json.fechaActualizacion }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "9d99bbf1-8cc1-419b-9cb1-8fb1b8260231",
+      "name": "Edit Fields1",
+      "retryOnFail": true,
+      "waitBetweenTries": 2000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3b66805c-d838-4ecf-98db-af19b0c172f4",
+              "leftValue": "={{ $json.venta }}",
+              "rightValue": 1200,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        592,
+        0
+      ],
+      "id": "76adf752-1a83-4323-82ec-bf07634f03ef",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "sendTo": "analiacaro96@gmail.com",
+        "subject": "🚨 ALERTA Valor USD",
+        "message": "=<h2>🚨 Alerta de cotización</h2>\n<p><b>Tipo:</b> {{$json.tipo}}</p>\n<p><b>Compra:</b> ${{$json.compra}}</p>\n<p><b>Venta:</b> ${{$json.venta}}</p>\n<p><b>Actualización:</b> {{$json.fecha}}</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        -96
+      ],
+      "id": "9c9d3da4-c33f-486a-91db-c008ea087342",
+      "name": "Send a message ALERTA",
+      "webhookId": "5f9b253e-ec08-4dcf-b8e1-d4725aa2d3c1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "avPf2KXOsG1UbuQC",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "analiacaro96@gmail.com",
+        "subject": "🚨REPORTE Valor USD",
+        "message": "=<h2>🚨 REPORTE de cotización</h2>\n<p><b>Tipo:</b> {{$json.tipo}}</p>\n<p><b>Compra:</b> ${{$json.compra}}</p>\n<p><b>Venta:</b> ${{$json.venta}}</p>\n<p><b>Actualización:</b> {{$json.fecha}}</p>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        816,
+        80
+      ],
+      "id": "be531d0e-34cd-423e-ae08-2a99a91cae3a",
+      "name": "Send a message REPORTE",
+      "webhookId": "5f9b253e-ec08-4dcf-b8e1-d4725aa2d3c1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "avPf2KXOsG1UbuQC",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message ALERTA",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message REPORTE",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "d39b497b-f2c8-4b5c-971f-7ffa8be87d85",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "e48995874f51cf98a0fda7c07ddd0354a31f1bd417a6acd2f8a753b233552a04"
+  },
+  "id": "LyZLCNmNQ3MehBkm",
+  "tags": []
+}
